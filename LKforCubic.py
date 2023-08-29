@@ -20,12 +20,17 @@ def GrandPotential(B,mu,T):
     Ncutoff = int(np.floor(N_0_cutoff/B))
     energy1=np.zeros(Ncutoff)
     energy2=np.zeros(Ncutoff)
-    energy3 = np.zeros(Ncutoff)
+    energy3=np.zeros(Ncutoff)
     for n in range(0,Ncutoff):
         energy=Energy(n,B)
-        energy1[n]=np.log(1+np.exp((mu-energy[0])/T))-np.log(1+np.exp((mu+2*m*pow(v,2))/T))
-        energy2[n]=np.log(1+np.exp((mu-energy[1])/T))-np.log(1+np.exp((mu+2*m*pow(v,2))/T))
-        energy3[n]=np.log(1+np.exp((mu-energy[2])/T))
+        if (mu-energy[0])/T > 150:
+            energy1[n]=(mu-energy[0])/T-np.log(1+np.exp((mu+2*m*pow(v,2))/T))
+            energy2[n]=np.log(1+np.exp((mu-energy[1])/T))-np.log(1+np.exp((mu+2*m*pow(v,2))/T))
+            energy3[n]=np.log(1+np.exp((mu-energy[2])/T))
+        else:
+            energy1[n]=np.log(1+np.exp((mu-energy[0])/T))-np.log(1+np.exp((mu+2*m*pow(v,2))/T))
+            energy2[n]=np.log(1+np.exp((mu-energy[1])/T))-np.log(1+np.exp((mu+2*m*pow(v,2))/T))
+            energy3[n]=np.log(1+np.exp((mu-energy[2])/T))
     Phi=-T*(np.sum(energy2)+np.sum(energy1)+np.sum(energy3))
     return Phi*B
 
@@ -37,8 +42,8 @@ def negative_power_polynomial_func(x, *coefficients):
     return y
 
 # Calculate oscillatory grand potential for a range of magnetic fields and temperatures
-magnetic_field_inverse_range = np.linspace(10, 11, 200)
-T_range = np.linspace(0.1,0.6 , 20)
+magnetic_field_inverse_range = np.linspace(1, 1.5, 200)
+T_range = np.linspace(0.01,0.6 , 20)
 M=np.zeros((len(magnetic_field_inverse_range), len(T_range)))
 oscillatory_grand_potential = np.zeros((len(magnetic_field_inverse_range), len(T_range)))
 

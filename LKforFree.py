@@ -28,42 +28,7 @@ def negative_power_polynomial_func(x, *coefficients):
         y += c * np.power(x, -i, dtype=np.float64)
     return y
 magnetic_field_inverse_range=np.arange(1,5, 0.01)
-# M=[]
-# # Calculate oscillatory grand potential for a range of magnetic fields and temperatures
 
-# grand_potential = np.array(Parallel(n_jobs=-1)(delayed(GrandPotentialZeroT)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
-# # grand_potential = np.array(Parallel(n_jobs=-1)(delayed(GrandPotential)(1/b, mu, 0.01) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
-
-# degree = 2  # Define the degree of the polynomial (can be adjusted as needed)
-# initial_guess = np.zeros(degree + 1)  # Provide an initial guess for the coefficients
-
-# coefficients, _ = curve_fit(negative_power_polynomial_func, magnetic_field_inverse_range, grand_potential, p0=initial_guess)
-
-# # Generate the background curve using the fitted polynomial coefficients
-# background_curve = negative_power_polynomial_func(magnetic_field_inverse_range, *coefficients)
-
-# # Subtract the background curve from the grand potential to obtain the oscillatory part
-# oscillatory_part = grand_potential - background_curve
-
-# M=np.gradient(oscillatory_part, magnetic_field_inverse_range)*magnetic_field_inverse_range**2
-# plt.plot(magnetic_field_inverse_range ,grand_potential)
-# plt.title("grand_potential")
-# plt.xlabel("1/B")
-# plt.show()
-# plt.plot(magnetic_field_inverse_range ,oscillatory_part)
-# plt.title("oscillatory_part")
-# plt.xlabel("1/B")
-# plt.show()
-# plt.plot(magnetic_field_inverse_range ,M)
-# plt.title("M")
-# plt.xlabel("1/B")
-# plt.show()
-
-
-# plt.plot(magnetic_field_inverse_range ,M)
-# plt.xlabel("1/B")
-# # plt.title("n cutoff=10,000, number of state below mu")
-# plt.show()
 T_range = np.linspace(0.003, 0.2, 100)
 M = np.zeros((len(magnetic_field_inverse_range), len(T_range)))
 oscillatory_grand_potential = np.zeros((len(magnetic_field_inverse_range), len(T_range)))
