@@ -8,9 +8,9 @@ v = 1
 m = 0.5
 mu1 = -50
 W = 5
-mu = -10
+mu = -0.85
 N_0_cutoff = 10000
-T = 0.1
+T = 0
 def negative_power_polynomial_func(x, *coefficients):
     y = np.zeros_like(x, dtype=np.float64)
     for i, c in enumerate(coefficients):
@@ -74,10 +74,10 @@ def GrandPotential(B,mu,T):
             energy3[n]=np.log(1+np.exp((mu-energy[2])/T))
     Phi=-T*(np.sum(energy2)+np.sum(energy1)+np.sum(energy3))
     return Phi*B
-B_inverse_step=0.001
-magnetic_field_inverse_range=np.arange(1,2 , B_inverse_step)
-# grand_potential = np.array(Parallel(n_jobs=-1)(delayed(GrandPotentialZeroTWithPV)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
-grand_potential = np.array(Parallel(n_jobs=-1)(delayed(GrandPotential)(1/b, mu, T) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
+B_inverse_step=2e-5
+magnetic_field_inverse_range=np.arange(10,10.02 , B_inverse_step)
+grand_potential = np.array(Parallel(n_jobs=-1)(delayed(GrandPotentialZeroTWithPV)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
+# grand_potential = np.array(Parallel(n_jobs=-1)(delayed(GrandPotential)(1/b, mu, T) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
 degree = 2  # Define the degree of the polynomial (can be adjusted as needed)
 initial_guess = np.zeros(degree + 1)  # Provide an initial guess for the coefficients
 
