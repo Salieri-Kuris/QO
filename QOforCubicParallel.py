@@ -14,7 +14,7 @@ mu = -0.85
 N_0_cutoff = 10000
 finite = 1
 zero = 0
-correctness=1
+correctness=0
 T_finite=1e-6
 B_inverse_step = 2e-5
 magnetic_field_inverse_range = np.arange(10, 10.02, B_inverse_step)
@@ -31,7 +31,8 @@ def Energy(n, B):
     return sortedroots
 @jit(nopython=True)
 def GrandPotentialZeroTWithPV(B, mu):
-    Ncutoff = int(np.floor(N_0_cutoff/B))
+    # Ncutoff = int(np.floor(N_0_cutoff/B))
+    Ncutoff = N_0_cutoff
     Phi = 0
     for n in range(Ncutoff):
         energy = Energy(n, B)
@@ -53,33 +54,34 @@ def GrandPotentialZeroTWithPV(B, mu):
     return Phi * B
 @jit(nopython=True)
 def GrandPotential(B,mu,T):
-    Ncutoff = int(np.floor(N_0_cutoff/B))
+    # Ncutoff = int(np.floor(N_0_cutoff/B))
+    Ncutoff = N_0_cutoff
     energy0=np.zeros(Ncutoff)
     energy1=np.zeros(Ncutoff)
     energy2=np.zeros(Ncutoff)
     Phi_finiteT=0
     for n in range(0,Ncutoff):
         energy=Energy(n,B)
-        if (mu-energy[0])/T > 150:
+        if (mu-energy[0])/T > 200:
             energy0_part1=(mu-energy[0])/T
         else:
             energy0_part1=np.log(1+np.exp((mu-energy[0])/T))
-        if (mu+2*m*pow(v,2))/T > 150:
+        if (mu+2*m*pow(v,2))/T > 200:
             energy0_part2=(mu+2*m*pow(v,2))/T
         else:
             energy0_part2=np.log(1+np.exp((mu+2*m*pow(v,2))/T))
         energy0[n] = energy0_part1 + energy0_part2
         
-        if (mu-energy[1])/T > 150:
+        if (mu-energy[1])/T > 200:
             energy1_part1=(mu-energy[1])/T
         else:
             energy1_part1=np.log(1+np.exp((mu-energy[1])/T))
-        if (mu+2*m*pow(v,2))/T > 150:
+        if (mu+2*m*pow(v,2))/T > 200:
             energy1_part2=(mu+2*m*pow(v,2))/T
         else:
             energy1_part2=np.log(1+np.exp((mu+2*m*pow(v,2))/T))
         energy1[n] = energy1_part1 + energy1_part2
-        if (mu-energy[2])/T > 150:
+        if (mu-energy[2])/T > 200:
             energy2[n]=(mu-energy[2])/T
         else:
             energy2[n]=np.log(1+np.exp((mu-energy[2])/T))    
@@ -99,10 +101,11 @@ def LL_Counting(B, mu):
         Num += np.sum(Energy(n, B) < mu)
     return Num
 
-
-
-
 num_LL_below_mu = np.array(Parallel(n_jobs=-1)(delayed(LL_Counting)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Number of LL below mu")))
+plt.plot(magnetic_field_inverse_range, num_LL_below_mu)
+plt.xlabel("1/B")
+plt.title("Number of LL below mu")
+plt.show()
 if zero == 1:
     T = 0
     grand_potential_zeroT = np.array(Parallel(n_jobs=-1)(delayed(GrandPotentialZeroTWithPV)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
@@ -124,8 +127,11 @@ if zero == 1:
     z_scores_M = stats.zscore(M)
     threshold = 1
     M_correct = M[abs(z_scores_M) < threshold]
-
     magnetic_field_inverse_range_correct = magnetic_field_inverse_range[abs(z_scores_M) < threshold]
+    # z_scores_Mcorrect = stats.zscore(M_correct)
+    # threshold = 2
+    # M_correct = M_correct[abs(z_scores_Mcorrect) < threshold]
+    # magnetic_field_inverse_range_correct = magnetic_field_inverse_range_correct[abs(z_scores_Mcorrect) < threshold]
     degree = 1  # Define the degree of the polynomial (can be adjusted as needed)
     initial_guess = np.zeros(degree + 1)  # Provide an initial guess for the coefficients
 
@@ -149,7 +155,7 @@ if zero == 1:
 
     plt.plot(magnetic_field_inverse_range, grand_potential_zeroT)
     plt.xlabel("1/B")
-    plt.title(f"total phi corrected,mu={mu},1/B step={B_inverse_step},T={T}")
+    plt.title(f"total phi,mu={mu},1/B step={B_inverse_step},T={T}")
     plt.show()
 
     plt.plot(magnetic_field_inverse_range, oscillatory_part)
@@ -181,11 +187,6 @@ if zero == 1:
 
 
 if finite == 1:
-    plt.plot(magnetic_field_inverse_range, num_LL_below_mu)
-    plt.xlabel("1/B")
-    plt.title("Number of LL below mu")
-    plt.show()
-
     T=T_finite
     grand_potential_finiteT = np.array(Parallel(n_jobs=-1)(delayed(GrandPotential)(1/b, mu, T) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
 
