@@ -12,12 +12,15 @@ mu1 = -50
 W = 5
 mu = -0.85
 N_0_cutoff = 10000
-finite = 1
-zero = 0
+finite = 0
+zero = 1
 correctness=0
 T_finite=1e-6
 B_inverse_step = 2e-5
-magnetic_field_inverse_range = np.arange(10, 10.02, B_inverse_step)
+propotion = 1.0005
+mu_cutoff_0 = -propotion * 2*m*v**2
+mu_cutoff_1 = -1/propotion * 2*m*v**2
+magnetic_field_inverse_range = np.arange(1, 1.02, B_inverse_step)
 def find_peaks_1d(data, height=None, distance=None):
     peaks, _ = find_peaks(data, height=height, distance=distance)
     return peaks
@@ -51,6 +54,19 @@ def GrandPotentialZeroTWithPV(B, mu):
         if energy[2] < mu:
             Phi += energy[2] - mu
 
+    return Phi * B
+@jit(nopython=True)
+def GrandPotentialZeroT_Cooper(B, mu):
+    Ncutoff = N_0_cutoff
+    Phi = 0
+    for n in range(Ncutoff):
+        energy = Energy(n, B)
+        if energy[0] < mu_cutoff_0:
+            Phi += energy[0] - mu
+        if energy[1] < mu_cutoff_1:
+            Phi += energy[0] - mu        
+        if energy[2] < mu:
+            Phi += energy[2] - mu
     return Phi * B
 @jit(nopython=True)
 def GrandPotential(B,mu,T):
@@ -108,7 +124,7 @@ plt.title("Number of LL below mu")
 plt.show()
 if zero == 1:
     T = 0
-    grand_potential_zeroT = np.array(Parallel(n_jobs=-1)(delayed(GrandPotentialZeroTWithPV)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
+    grand_potential_zeroT = np.array(Parallel(n_jobs=-1)(delayed(GrandPotentialZeroT_Cooper)(1/b, mu) for b in tqdm(magnetic_field_inverse_range, desc="Calculating Grand Potential")))
     # Calculate the z-score for each value in grand_potential
 
 
