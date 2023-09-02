@@ -10,6 +10,8 @@ m = 0.5
 mu1 = -50
 W = 5
 mu = -0.85
+mu_m_divide_flatband=0.95
+
 N_0_cutoff = 10000
 num_M = 1000
 num_T = 100
